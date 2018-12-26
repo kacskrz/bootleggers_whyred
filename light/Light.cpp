@@ -39,11 +39,11 @@
 #define MAX_LCD_BRIGHTNESS    255
 
 /*
- * 8 duty percent steps.
+ * 15 duty percent steps.
  */
 #define RAMP_STEPS 15
 /*
- * Each step will stay on for 50ms by default.
+ * Each step will stay on for 150ms by default.
  */
 #define RAMP_STEP_DURATION 150
 /*
@@ -103,6 +103,9 @@ static inline uint32_t getScaledBrightness(const LightState& state, uint32_t max
 
 static void handleBacklight(Type /* type */, const LightState& state) {
     uint32_t brightness = getScaledBrightness(state, MAX_LCD_BRIGHTNESS);
+
+static void handleBacklight(const LightState& state) {
+    uint32_t brightness = getScaledBrightness(state, getMaxBrightness(LCD_LED MAX_BRIGHTNESS));
     set(LCD_LED BRIGHTNESS, brightness);
 }
 
@@ -123,6 +126,9 @@ static std::string getScaledRamp(uint32_t brightness) {
 
 static void setNotification(const LightState& state) {
     uint32_t redBrightness = getScaledBrightness(state, MAX_LED_BRIGHTNESS);
+
+static void handleNotification(const LightState& state) {
+    uint32_t whiteBrightness = getScaledBrightness(state, getMaxBrightness(WHITE_LED MAX_BRIGHTNESS));
 
     /* Disable blinking */
     set(RED_LED BLINK, 0);
@@ -190,13 +196,17 @@ static void handleNotification(Type type, const LightState& state) {
 }
 
 static std::map<Type, std::function<void(Type type, const LightState&)>> lights = {
+
+/* Keep sorted in the order of importance. */
+static std::vector<LightBackend> backends = {
+
     { Type::ATTENTION, handleNotification },
     { Type::NOTIFICATIONS, handleNotification },
     { Type::BATTERY, handleNotification },
     { Type::BACKLIGHT, handleBacklight },
 };
 
-} // anonymous namespace
+}  // anonymous namespace
 
 namespace android {
 namespace hardware {
@@ -205,18 +215,38 @@ namespace V2_0 {
 namespace implementation {
 
 Return<Status> Light::setLight(Type type, const LightState& state) {
-    auto it = lights.find(type);
+    LightStateHandler handler;
+    bool handled = false;
 
-    if (it == lights.end()) {
+    /* Lock global mutex until light state is updated. */
+    std::lock_guard<std::mutex> lock(globalLock);
+
+    /* Update the cached state value for the current type. */
+    for (LightBackend& backend : backends) {
+        if (backend.type == type) {
+            backend.state = state;
+            handler = backend.handler;
+        }
+    }
+
+    /* If no handler has been found, then the type is not supported. */
+    if (!handler) {
         return Status::LIGHT_NOT_SUPPORTED;
     }
 
-    /*
-     * Lock global mutex until light state is updated.
-     */
-    std::lock_guard<std::mutex> lock(globalLock);
+    /* Light up the type with the highest priority that matches the current handler. */
+    for (LightBackend& backend : backends) {
+        if (handler == backend.handler && isLit(backend.state)) {
+            handler(backend.state);
+            handled = true;
+            break;
+        }
+    }
 
-    it->second(type, state);
+    /* If no type has been lit up, then turn off the hardware. */
+    if (!handled) {
+        handler(state);
+    }
 
     return Status::SUCCESS;
 }
@@ -224,8 +254,8 @@ Return<Status> Light::setLight(Type type, const LightState& state) {
 Return<void> Light::getSupportedTypes(getSupportedTypes_cb _hidl_cb) {
     std::vector<Type> types;
 
-    for (auto const& light : lights) {
-        types.push_back(light.first);
+    for (const LightBackend& backend : backends) {
+        types.push_back(backend.type);
     }
 
     _hidl_cb(types);
