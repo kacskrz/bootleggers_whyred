@@ -1,1 +1,5 @@
+<<<<<<< HEAD
+=======
+#============= location ==============
+>>>>>>> 024aa8d... whyred: sepolicy: Address denials
 allow location sysfs:file { read open };
