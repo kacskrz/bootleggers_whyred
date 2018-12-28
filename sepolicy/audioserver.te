@@ -1,0 +1,2 @@
+#============= audioserver ==============
+allow audioserver self:netlink_kobject_uevent_socket read;

@@ -1,0 +1,4 @@
+#============= kernel ==============
+allow kernel device:chr_file { getattr unlink };
+allow kernel device:dir remove_name;
+allow kernel unlabeled:file { open read write };
