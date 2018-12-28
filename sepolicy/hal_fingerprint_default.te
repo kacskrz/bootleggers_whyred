@@ -7,6 +7,7 @@ allow hal_fingerprint_default property_socket:sock_file write;
 allow hal_fingerprint_default sysfs:file write;
 allow hal_fingerprint_default system_prop:property_service set;
 allow hal_fingerprint_default default_prop:file { getattr open read };
+allow hal_fingerprint_default default_android_service:hwservice_manager add;
 
 allow hal_fingerprint_default tee_device:chr_file rw_file_perms;
 allow hal_fingerprint_default uhid_device:chr_file rw_file_perms;
