@@ -10,4 +10,4 @@ allow init tee_device:chr_file { write ioctl };
 allow init vndbinder_device:chr_file { ioctl open read write };
 allow init vendor_file:file execute;
 allow init vendor_file:file { execute execute_no_trans };
-
+allow init hal_power_hwservice:hwservice_manager add;
