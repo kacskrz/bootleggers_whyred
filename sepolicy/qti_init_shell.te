@@ -14,9 +14,6 @@ allow qti_init_shell self:capability dac_override;
 allow qti_init_shell system_prop:property_service set;
 allow qti_init_shell system_radio_prop:property_service set;
 allow qti_init_shell sysfs:file write;
-<<<<<<< HEAD
 allow qti_init_shell ctl_start_prop:property_service set;
-=======
 allow qti_init_shell system_prop:file { getattr open read };
 allow qti_init_shell vendor_radio_data_file:dir search;
->>>>>>> 024aa8d... whyred: sepolicy: Address denials

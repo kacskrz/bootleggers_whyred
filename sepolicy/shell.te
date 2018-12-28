@@ -1,5 +1,1 @@
 allow shell kernel:system syslog_read;
-<<<<<<< HEAD
-
-=======
->>>>>>> 024aa8d... whyred: sepolicy: Address denials
