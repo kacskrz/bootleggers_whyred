@@ -1,3 +1,0 @@
-#============= netd ==============
-allow netd hi110x_daemon:fd use;
-allow netd hi110x_daemon:tcp_socket { getopt read setopt write };
