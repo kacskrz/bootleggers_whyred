@@ -41,11 +41,8 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     TARGET_DEVICE="whyred" \
     PRODUCT_NAME="whyred" \
     PRIVATE_BUILD_DESC="whyred-user 8.1.0 OPM1.171019.011 V9.5.11.0.OEIMIFA release-keys"
+    DEVICE_MAINTAINERS="Adi |@Adi20_01"
 
 BUILD_FINGERPRINT := xiaomi/whyred/whyred:8.1.0/OPM1.171019.011/V9.5.11.0.OEIMIFA:user/release-keys
 
 TARGET_VENDOR := Xiaomi
-
-DEVICE_MAINTAINERS := "Adi|@Adi20_01"
-
-BOOTLEGGERS_BUILD_TYPE :="Unshishufied"
